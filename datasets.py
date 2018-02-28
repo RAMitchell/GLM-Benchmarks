@@ -5,6 +5,7 @@ import gzip
 import numpy as np
 import zipfile
 import os
+import sys
 import pandas as pd
 from scipy.sparse import vstack
 from sklearn.externals.joblib import Memory
@@ -38,7 +39,7 @@ def get_year():
     url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00203/YearPredictionMSD.txt.zip'
     filename = 'YearPredictionMSD.txt'
     if not os.path.isfile(filename):
-        urllib.urlretrieve(url, filename + '.zip')
+        urlretrieve(url, filename + '.zip')
         zip_ref = zipfile.ZipFile(filename + '.zip', 'r')
         zip_ref.extractall()
         zip_ref.close()
@@ -54,7 +55,7 @@ def get_url():
     url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/url/url_svmlight.tar.gz'
     filename = 'url_svmlight.tar.gz'
     if not os.path.isfile(filename):
-        urllib.urlretrieve(url)
+        urlretrieve(url, filename)
         tar = tarfile.open(filename, "r:gz")
         tar.extractall()
         tar.close()

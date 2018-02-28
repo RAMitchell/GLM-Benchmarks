@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import time
 import xgboost as xgb
+from scipy import sparse
 from sklearn import metrics, linear_model, preprocessing
 
 num_rounds = 1000
@@ -16,6 +17,12 @@ def is_float(s):
         return 1
     except ValueError:
         return 0
+
+
+def get_density(X):
+    if sparse.issparse(X):
+        return X.count_nonzero() / float(X.shape[0] * X.shape[1])
+    return np.count_nonzero(X) / float(X.shape[0] * X.shape[1])
 
 
 def xgb_get_weights(bst):
@@ -41,7 +48,7 @@ def run_regression(df, dataset, X, y, reg_alpha, reg_lambda, standardize=True):
         X = preprocessing.StandardScaler().fit_transform(X)
         y = preprocessing.scale(y)
     metric = 'RMSE'
-    density = np.count_nonzero(X) / float(X.shape[0] * X.shape[1])
+    density = get_density(X)
     param = {'booster': 'gblinear', 'updater': 'coord_descent', 'reg_alpha': reg_alpha, 'reg_lambda': reg_lambda,
              'debug_verbose': 1}
     run_xgboost_regression(df, X, y, param, dataset, reg_alpha, reg_lambda, metric, density)
@@ -115,7 +122,7 @@ def run_classification(df, dataset, X, y, reg_alpha, reg_lambda, standardize=Tru
     if standardize:
         X = preprocessing.StandardScaler().fit_transform(X)
     metric = 'Accuracy score'
-    density = np.count_nonzero(X) / float(X.shape[0] * X.shape[1])
+    density = get_density(X)
     param = {'booster': 'gblinear', 'objective': 'binary:logistic', 'updater': 'coord_descent', 'reg_alpha': reg_alpha,
              'reg_lambda': reg_lambda, 'debug_verbose': 1}
     if 'XGBoost' in solvers:
