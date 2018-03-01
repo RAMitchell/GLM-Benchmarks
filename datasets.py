@@ -39,6 +39,13 @@ def get_higgs(num_rows=None):
 
 
 @mem.cache
+def get_synthetic_regression(num_rows=None):
+    if num_rows is None:
+        num_rows = 10000000
+    return datasets.make_regression(n_samples=num_rows, bias=100, noise=1.0)
+
+
+@mem.cache
 def get_year(num_rows=None):
     url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00203/YearPredictionMSD.txt.zip'
     filename = 'YearPredictionMSD.txt'

@@ -39,7 +39,7 @@ def run_xgboost_regression(df, X, y, param, dataset, reg_alpha, reg_lambda, metr
     xgb_score = np.sqrt(metrics.mean_squared_error(y, bst.predict(dtrain)))
     xgb_zero = X.shape[1] - np.count_nonzero(xgb_get_weights(bst))
     xgb_iterations = bst.best_iteration + early_stopping_rounds
-    df.loc[len(df)] = [dataset, X.shape[1], X.shape[0], density, 'Regression', reg_alpha, reg_lambda, 'XGBoost', metric,
+    df.loc[len(df)] = [dataset, X.shape[1], X.shape[0], density, 'Regression', reg_alpha, reg_lambda, 'XGBoost ('+param['updater']+')', metric,
                        xgb_score,
                        xgb_time, xgb_iterations, xgb_zero]
 
@@ -51,7 +51,9 @@ def run_regression(df, dataset, X, y, reg_alpha, reg_lambda, standardize=True):
     metric = 'RMSE'
     density = get_density(X)
     param = {'booster': 'gblinear', 'updater': 'coord_descent', 'reg_alpha': reg_alpha, 'reg_lambda': reg_lambda,
-             'debug_verbose': 1}
+             'debug_verbose': 0}
+    run_xgboost_regression(df, X, y, param, dataset, reg_alpha, reg_lambda, metric, density)
+    param['updater'] = 'shotgun'
     run_xgboost_regression(df, X, y, param, dataset, reg_alpha, reg_lambda, metric, density)
 
     tmp = time.time()
@@ -83,7 +85,7 @@ def run_xgboost_classification(df, X, y, param, dataset, reg_alpha, reg_lambda, 
     xgb_time = time.time() - tmp
     xgb_score = metrics.accuracy_score(y, np.round(bst.predict(dtrain)))
     xgb_zero = X.shape[1] - np.count_nonzero(xgb_get_weights(bst))
-    df.loc[len(df)] = [dataset, X.shape[1], X.shape[0], density, 'Classification', reg_alpha, reg_lambda, 'XGBoost',
+    df.loc[len(df)] = [dataset, X.shape[1], X.shape[0], density, 'Classification', reg_alpha, reg_lambda, 'XGBoost ('+param['updater']+')',
                        metric,
                        xgb_score,
                        xgb_time, bst.best_iteration + early_stopping_rounds, xgb_zero]
@@ -137,6 +139,8 @@ def run_classification(df, dataset, X, y, reg_alpha, reg_lambda, standardize=Tru
              'reg_lambda': reg_lambda, 'debug_verbose': 1}
     if 'XGBoost' in solvers:
         run_xgboost_classification(df, X, y, param, dataset, reg_alpha, reg_lambda, metric, density)
+        param['updater'] = 'shotgun'
+        run_xgboost_classification(df, X, y, param, dataset, reg_alpha, reg_lambda, metric, density)
     if 'Sklearn (liblinear)' in solvers:
         run_sklearn_classification(df, X, y, 'liblinear', dataset, reg_alpha, reg_lambda, metric, density)
     if 'Sklearn (sag)' in solvers:
@@ -158,6 +162,9 @@ df = pd.DataFrame([], columns=['Dataset', 'Num features', 'Num rows', 'Density',
 
 X, y = datasets.get_year(num_rows)
 run_regression(df, 'YearPredictionMSD', X, y, 0.05, 0.1)
+
+X, y = datasets.get_synthetic_regression(num_rows)
+run_regression(df, 'Synthetic', X, y, 0.05, 0.1)
 
 X, y = datasets.get_higgs(num_rows)
 
