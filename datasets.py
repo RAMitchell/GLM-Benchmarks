@@ -1,15 +1,15 @@
-import shutil
-import urllib
-import tarfile
 import gzip
 import numpy as np
-import zipfile
 import os
-import sys
 import pandas as pd
+import shutil
+import sys
+import tarfile
+import urllib
+import zipfile
 from scipy.sparse import vstack
-from sklearn.externals.joblib import Memory
 from sklearn import datasets
+from sklearn.externals.joblib import Memory
 
 if sys.version_info[0] >= 3:
     from urllib.request import urlretrieve
@@ -18,8 +18,9 @@ else:
 
 mem = Memory("./mycache")
 
+
 @mem.cache
-def get_higgs():
+def get_higgs(num_rows=None):
     url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00280/HIGGS.csv.gz'
     filename = 'HIGGS.csv'
     if not os.path.isfile(filename):
@@ -30,12 +31,15 @@ def get_higgs():
     higgs = pd.read_csv(filename)
     X = higgs.iloc[:, 1:].values
     y = higgs.iloc[:, 0].values
+    if num_rows is not None:
+        X = X[0:num_rows]
+        y = y[0:num_rows]
 
     return X, y
 
 
 @mem.cache
-def get_year():
+def get_year(num_rows=None):
     url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00203/YearPredictionMSD.txt.zip'
     filename = 'YearPredictionMSD.txt'
     if not os.path.isfile(filename):
@@ -47,11 +51,15 @@ def get_year():
     year = pd.read_csv('YearPredictionMSD.txt', header=None)
     X = year.iloc[:, 1:].values
     y = year.iloc[:, 0].values
+    if num_rows is not None:
+        X = X[0:num_rows]
+        y = y[0:num_rows]
 
     return X, y
 
+
 @mem.cache
-def get_url():
+def get_url(num_rows=None):
     url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/url/url_svmlight.tar.gz'
     filename = 'url_svmlight.tar.gz'
     if not os.path.isfile(filename):
@@ -67,5 +75,9 @@ def get_url():
     y = np.concatenate(data[1::2])
 
     y[y < 0.0] = 0.0
-    return X, y
 
+    if num_rows is not None:
+        X = X[0:num_rows]
+        y = y[0:num_rows]
+
+    return X, y
