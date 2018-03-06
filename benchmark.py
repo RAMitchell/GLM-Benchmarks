@@ -55,6 +55,8 @@ def run_regression(df, dataset, X, y, reg_alpha, reg_lambda, standardize=True):
     run_xgboost_regression(df, X, y, param, dataset, reg_alpha, reg_lambda, metric, density)
     param['updater'] = 'shotgun'
     run_xgboost_regression(df, X, y, param, dataset, reg_alpha, reg_lambda, metric, density)
+    param['updater'] = 'gpu_coord_descent'
+    run_xgboost_regression(df, X, y, param, dataset, reg_alpha, reg_lambda, metric, density)
 
     tmp = time.time()
     enet = linear_model.ElasticNet(alpha=reg_alpha + reg_lambda, l1_ratio=reg_alpha / (reg_alpha + reg_lambda))
@@ -140,6 +142,8 @@ def run_classification(df, dataset, X, y, reg_alpha, reg_lambda, standardize=Tru
     if 'XGBoost' in solvers:
         run_xgboost_classification(df, X, y, param, dataset, reg_alpha, reg_lambda, metric, density)
         param['updater'] = 'shotgun'
+        run_xgboost_classification(df, X, y, param, dataset, reg_alpha, reg_lambda, metric, density)
+        param['updater'] = 'gpu_coord_descent'
         run_xgboost_classification(df, X, y, param, dataset, reg_alpha, reg_lambda, metric, density)
     if 'Sklearn (liblinear)' in solvers:
         run_sklearn_classification(df, X, y, 'liblinear', dataset, reg_alpha, reg_lambda, metric, density)
