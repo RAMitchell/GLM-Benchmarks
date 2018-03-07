@@ -37,6 +37,16 @@ def get_higgs(num_rows=None):
 
     return X, y
 
+@mem.cache
+def get_cover_type(num_rows=None):
+    data = datasets.fetch_covtype()
+    X = data.data
+    y = data.target
+    if num_rows is not None:
+        X = X[0:num_rows]
+        y = y[0:num_rows]
+
+    return X, y
 
 @mem.cache
 def get_synthetic_regression(num_rows=None):
